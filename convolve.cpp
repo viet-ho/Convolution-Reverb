@@ -1,10 +1,14 @@
 #include <iostream>
 #include <fstream>
+#include <memory>
+#include <ctime>
 #include <WAVEFile.h>
 
 using namespace std;
 
 void convolve(double x[], int N, double h[], int M, double y[], int P);
+void createOutputFile(char *filename);
+void shortToDouble(WAVEFile* waveFile, double doubleArray[]);
 
 WAVEFile *inputfile = new WAVEFile();
 WAVEFile *IRfile = new WAVEFile();
@@ -47,6 +51,24 @@ void convolve(double x[], int N, double h[], int M, double y[], int P) {
         for (m = 0; m < M; m++) {
             y[n+m] += x[n] * h[m];
         }
+    }
+
+}
+
+void createOutputFile(char *filename) {
+
+    double* input_signal = new double[inputfile->signalSize];
+    double* IR_signal = new double[IRfile->signalSize];
+    int output_size = inputfile->signalSize + IRfile->signalSize - 1;
+    short* output_signal = new short[output_size];
+    double* output_signal_double = new double[output_size];
+
+}
+
+void shortToDouble(WAVEFile* waveFile, double doubleArray[]) {
+    
+    for (int i = 0; i < (waveFile->signalSize); i++) {
+        doubleArray[i] = ((double) waveFile->signal[i])/32678.0;
     }
 
 }
