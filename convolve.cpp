@@ -9,6 +9,7 @@ using namespace std;
 void convolve(double x[], int N, double h[], int M, double y[], int P);
 void createOutputFile(char *filename);
 void shortToDouble(WAVEFile* waveFile, double doubleArray[]);
+void adjustOutputSignal(WAVEFile* waveFile, double* output_signal, int output_size);
 
 WAVEFile *inputfile = new WAVEFile();
 WAVEFile *IRfile = new WAVEFile();
@@ -60,8 +61,17 @@ void createOutputFile(char *filename) {
     double* input_signal = new double[inputfile->signalSize];
     double* IR_signal = new double[IRfile->signalSize];
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
-    short* output_signal = new short[output_size];
-    double* output_signal_double = new double[output_size];
+    double* output_signal = new double[output_size];
+    short* output_signal_short = new short[output_size];
+
+    shortToDouble(inputfile, input_signal);
+    shortToDouble(IRfile, IR_signal);
+
+    printf("Start convolution...\n");
+    convolve(input_signal, inputfile->signalSize, IR_signal, IRfile->signalSize, output_signal, output_size);
+    printf("End convolution...\n");
+
+
 
 }
 
@@ -69,6 +79,29 @@ void shortToDouble(WAVEFile* waveFile, double doubleArray[]) {
     
     for (int i = 0; i < (waveFile->signalSize); i++) {
         doubleArray[i] = ((double) waveFile->signal[i])/32678.0;
+    }
+
+}
+
+void adjustOutputSignal(WAVEFile* waveFile, double* output_signal, int output_size) {
+
+    double signalInputMax = 0.0;
+    double signalOutputMax = 0.0;
+
+    for (int i = 0; i < output_size; i++) {
+        if (signalInputMax < inputfile->signal[i]) {
+            signalInputMax = inputfile->signal[i];
+        }
+
+        if (signalOutputMax < output_signal[i]) {
+            signalOutputMax = output_signal[i];
+        }
+    }
+
+    double adjustFactor = signalInputMax / signalOutputMax;
+
+    for (int i = 0; i < output_size; i++) {
+        output_signal[i] *= adjustFactor;
     }
 
 }
