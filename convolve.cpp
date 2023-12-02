@@ -6,9 +6,9 @@
 
 using namespace std;
 
-void convolve(double x[], int N, double h[], int M, double y[], int P);
+void convolve(double *x, int N, double *h, int M, double *y, int P);
 void createOutputFile(char *filename);
-void shortToDouble(WAVEFile *waveFile, double doubleArray[]);
+void shortToDouble(WAVEFile *waveFile, double *doubleArray);
 void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_size);
 void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int sampleRate, FILE *outputFile);
 size_t fwriteIntLSB(int data, FILE *outputFile);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void convolve(double x[], int N, double h[], int M, double y[], int P)
+void convolve(double *x, int N, double *h, int M, double *y, int P)
 {
 
     int n, m;
@@ -111,7 +111,7 @@ void createOutputFile(char *filename)
     fclose(outputfile);
 }
 
-void shortToDouble(WAVEFile *waveFile, double doubleArray[])
+void shortToDouble(WAVEFile *waveFile, double *doubleArray)
 {
 
     for (int i = 0; i < (waveFile->signalSize); i++)
