@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     inputfile->readWAVEFile(inputFileName);
     IRfile->readWAVEFile(IRFileName);
 
-    cout << "\nInput Size: " << inputfile->signalSize << ", Impulse Size: " << IRfile->signalSize << '\n';
+    cout << "Input Size: " << inputfile->signalSize << ", Impulse Size: " << IRfile->signalSize << '\n';
 
     createOutputFile(outputFileName);
     return 0;
@@ -74,13 +74,18 @@ void createOutputFile(char *filename)
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
     double *output_signal = new double[output_size];
     short *output_signal_short = new short[output_size];
+    time_t startTime;
+    time_t endTime;
 
     shortToDouble(inputfile, input_signal);
     shortToDouble(IRfile, IR_signal);
 
     printf("Start convolution...\n");
+    time(&startTime);
     convolve(input_signal, inputfile->signalSize, IR_signal, IRfile->signalSize, output_signal, output_size);
+    time(&endTime);
     printf("End convolution!\n");
+    printf("The convolution was done in %.2f seconds!\n", difftime(endTime, startTime));
 
     adjustOutputSignal(inputfile, output_signal, output_size);
     for (int i = 0; i < output_size; i++)
@@ -123,9 +128,9 @@ void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_si
 
     for (int i = 0; i < output_size; i++)
     {
-        if (signalInputMax < inputfile->signal[i])
+        if (signalInputMax < waveFile->signal[i])
         {
-            signalInputMax = inputfile->signal[i];
+            signalInputMax = waveFile->signal[i];
         }
 
         if (signalOutputMax < output_signal[i])
