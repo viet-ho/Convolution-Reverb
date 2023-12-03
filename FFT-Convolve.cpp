@@ -18,6 +18,7 @@ size_t fwriteIntLSB(int data, FILE *outputFile);
 size_t fwriteShortLSB(short data, FILE *outputFile);
 void four1(double data[], unsigned long nn, int isign);
 void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_size);
+void convolve(double *freq_input_signal, double *freq_IR_signal, double *freq_output_signal, int length);
 
 WAVEFile *inputfile = new WAVEFile();
 WAVEFile *IRfile = new WAVEFile();
@@ -83,19 +84,7 @@ void createOutputFile(char *filename)
     four1(freq_input_signal - 1, powerOfTwo, 1);
     four1(freq_IR_signal - 1, powerOfTwo, 1);
 
-    clock_t startTime;
-    clock_t endTime;
-    printf("Start convolution...\n");
-    startTime = clock();
-    for (int i = 0; i < (powerOfTwo * 2); i += 2)
-    {
-        freq_output_signal[i] = (freq_input_signal[i] * freq_IR_signal[i]) - (freq_input_signal[i + 1] * freq_IR_signal[i + 1]);
-        freq_output_signal[i + 1] = (freq_input_signal[i + 1] * freq_IR_signal[i]) + (freq_input_signal[i] * freq_IR_signal[i + 1]);
-    }
-    endTime = clock();
-    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
-    printf("End convolution!\n");
-    printf("The convolution was done in %.4f seconds!\n", time);
+    convolve(freq_input_signal, freq_IR_signal, freq_output_signal, powerOfTwo * 2);
 
     four1(freq_output_signal - 1, powerOfTwo, -1);
     for (int i = 0; i < output_size; i++)
@@ -128,6 +117,23 @@ void shortToDouble(WAVEFile *waveFile, double doubleArray[])
     {
         doubleArray[i] = ((double)waveFile->signal[i]) / 32678.0;
     }
+}
+
+void convolve(double *freq_input_signal, double *freq_IR_signal, double *freq_output_signal, int length)
+{
+    clock_t startTime;
+    clock_t endTime;
+    printf("Start convolution...\n");
+    startTime = clock();
+    for (int i = 0; i < length; i += 2)
+    {
+        freq_output_signal[i] = (freq_input_signal[i] * freq_IR_signal[i]) - (freq_input_signal[i + 1] * freq_IR_signal[i + 1]);
+        freq_output_signal[i + 1] = (freq_input_signal[i + 1] * freq_IR_signal[i]) + (freq_input_signal[i] * freq_IR_signal[i + 1]);
+    }
+    endTime = clock();
+    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
+    printf("End convolution!\n");
+    printf("The convolution was done in %.4f seconds!\n", time);
 }
 
 void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int sampleRate, FILE *outputFile)
