@@ -73,7 +73,6 @@ void createOutputFile(char *filename)
     double *IR_signal = new double[IRfile->signalSize];
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
     double *output_signal = new double[output_size];
-    short *output_signal_short = new short[output_size];
     clock_t startTime;
     clock_t endTime;
 
@@ -89,10 +88,6 @@ void createOutputFile(char *filename)
     printf("The convolution was done in %.2f seconds!\n", time);
 
     adjustOutputSignal(inputfile, output_signal, output_size);
-    for (int i = 0; i < output_size; i++)
-    {
-        output_signal_short[i] = static_cast<short>(output_signal[i]);
-    }
 
     FILE *outputfile = fopen(filename, "wb");
     if (outputfile == NULL)
@@ -105,7 +100,7 @@ void createOutputFile(char *filename)
     writeWAVEFileHeader(inputfile->numChannels, output_size, inputfile->bitsPerSample, inputfile->sampleRate, outputfile);
     for (int i = 0; i < output_size; i++)
     {
-        fwriteShortLSB(output_signal_short[i], outputfile);
+        fwriteShortLSB(static_cast<short>(output_signal[i]), outputfile);
     }
     printf("End writing!\n");
 
