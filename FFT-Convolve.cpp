@@ -52,8 +52,9 @@ int main(int argc, char *argv[])
 
     double *freq_input_signal = new double[powerOfTwo * 2];
     double *freq_IR_signal = new double[powerOfTwo * 2];
+    double *freq_output_signal = new double[powerOfTwo * 2];
 
-    for (int i = 0; i < powerOfTwo * 2; i++)
+    for (int i = 0; i < (powerOfTwo * 2); i++)
     {
         freq_input_signal[i] = 0.0;
         freq_IR_signal[i] = 0.0;
@@ -69,8 +70,22 @@ int main(int argc, char *argv[])
         freq_IR_signal[i * 2] = IR_signal[i];
     }
 
-    four1(freq_input_signal-1, powerOfTwo, 1);
-    four1(freq_IR_signal-1, powerOfTwo, 1);
+    four1(freq_input_signal - 1, powerOfTwo, 1);
+    four1(freq_IR_signal - 1, powerOfTwo, 1);
+
+    clock_t startTime;
+    clock_t endTime;
+    printf("Start convolution...\n");
+    startTime = clock();
+    for (int i = 0; i < (powerOfTwo * 2); i += 2)
+    {
+        freq_output_signal[i] = (freq_input_signal[i] * freq_IR_signal[i]) - (freq_input_signal[i + 1] * freq_IR_signal[i + 1]);
+        freq_output_signal[i + 1] = (freq_input_signal[i + 1] * freq_IR_signal[i]) + (freq_input_signal[i] * freq_IR_signal[i + 1]);
+    }
+    endTime = clock();
+    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
+    printf("End convolution!\n");
+    printf("The convolution was done in %.2f seconds!\n", time);
 }
 
 void shortToDouble(WAVEFile *waveFile, double doubleArray[])
