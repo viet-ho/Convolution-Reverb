@@ -11,11 +11,16 @@
 
 using namespace std;
 
+void createOutputFile(char *filename);
 void shortToDouble(WAVEFile *waveFile, double doubleArray[]);
 void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int sampleRate, FILE *outputFile);
 size_t fwriteIntLSB(int data, FILE *outputFile);
 size_t fwriteShortLSB(short data, FILE *outputFile);
 void four1(double data[], unsigned long nn, int isign);
+void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_size);
+
+WAVEFile *inputfile = new WAVEFile();
+WAVEFile *IRfile = new WAVEFile();
 
 int main(int argc, char *argv[])
 {
@@ -26,9 +31,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    WAVEFile *inputfile = new WAVEFile();
-    WAVEFile *IRfile = new WAVEFile();
-
     char *inputFileName = argv[1];
     char *IRFileName = argv[2];
     char *outputFileName = argv[3];
@@ -38,6 +40,14 @@ int main(int argc, char *argv[])
 
     cout << "Input Size: " << inputfile->signalSize << ", Impulse Size: " << IRfile->signalSize << '\n';
 
+    createOutputFile(outputFileName);
+    return 0;
+}
+
+void createOutputFile(char *filename)
+{
+    int output_size = inputfile->signalSize + IRfile->signalSize - 1;
+    double *output_signal = new double[output_size];
     double *input_signal = new double[inputfile->signalSize];
     double *IR_signal = new double[IRfile->signalSize];
     shortToDouble(inputfile, input_signal);
@@ -85,7 +95,31 @@ int main(int argc, char *argv[])
     endTime = clock();
     double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
     printf("End convolution!\n");
-    printf("The convolution was done in %.2f seconds!\n", time);
+    printf("The convolution was done in %.4f seconds!\n", time);
+
+    four1(freq_output_signal - 1, powerOfTwo, -1);
+    for (int i = 0; i < output_size; i++)
+    {
+        output_signal[i] = freq_output_signal[i * 2];
+    }
+    adjustOutputSignal(inputfile, output_signal, output_size);
+
+    FILE *outputfile = fopen(filename, "wb");
+    if (outputfile == NULL)
+    {
+        fprintf(stderr, "File %s cannot be opened for writing\n", filename);
+        return;
+    }
+
+    printf("Start writing header and signal data to output file...\n");
+    writeWAVEFileHeader(inputfile->numChannels, output_size, inputfile->bitsPerSample, inputfile->sampleRate, outputfile);
+    for (int i = 0; i < output_size; i++)
+    {
+        fwriteShortLSB(static_cast<short>(output_signal[i]), outputfile);
+    }
+    printf("End writing!\n");
+
+    fclose(outputfile);
 }
 
 void shortToDouble(WAVEFile *waveFile, double doubleArray[])
@@ -134,6 +168,33 @@ size_t fwriteShortLSB(short data, FILE *outputFile)
     array[1] = (unsigned char)((data >> 8) & 0xFF);
     array[0] = (unsigned char)(data & 0xFF);
     return fwrite(array, sizeof(unsigned char), 2, outputFile);
+}
+
+void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_size)
+{
+
+    double signalInputMax = 0.0;
+    double signalOutputMax = 0.0;
+
+    for (int i = 0; i < output_size; i++)
+    {
+        if (signalInputMax < waveFile->signal[i])
+        {
+            signalInputMax = waveFile->signal[i];
+        }
+
+        if (signalOutputMax < output_signal[i])
+        {
+            signalOutputMax = output_signal[i];
+        }
+    }
+
+    double adjustFactor = signalInputMax / signalOutputMax;
+
+    for (int i = 0; i < output_size; i++)
+    {
+        output_signal[i] *= adjustFactor;
+    }
 }
 
 void four1(double data[], unsigned long nn, int isign)
