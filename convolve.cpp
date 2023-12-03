@@ -74,18 +74,19 @@ void createOutputFile(char *filename)
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
     double *output_signal = new double[output_size];
     short *output_signal_short = new short[output_size];
-    time_t startTime;
-    time_t endTime;
+    clock_t startTime;
+    clock_t endTime;
 
     shortToDouble(inputfile, input_signal);
     shortToDouble(IRfile, IR_signal);
 
     printf("Start convolution...\n");
-    time(&startTime);
+    startTime = clock();
     convolve(input_signal, inputfile->signalSize, IR_signal, IRfile->signalSize, output_signal, output_size);
-    time(&endTime);
+    endTime = clock();
+    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
     printf("End convolution!\n");
-    printf("The convolution was done in %.2f seconds!\n", difftime(endTime, startTime));
+    printf("The convolution was done in %.2f seconds!\n", time);
 
     adjustOutputSignal(inputfile, output_signal, output_size);
     for (int i = 0; i < output_size; i++)
