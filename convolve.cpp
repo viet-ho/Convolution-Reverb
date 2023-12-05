@@ -19,6 +19,9 @@ WAVEFile *IRfile = new WAVEFile();
 
 int main(int argc, char *argv[])
 {
+    clock_t startTime;
+    clock_t endTime;
+    startTime = clock();
 
     if (argc != 4)
     {
@@ -36,6 +39,11 @@ int main(int argc, char *argv[])
     cout << "Input Size: " << inputfile->signalSize << ", Impulse Size: " << IRfile->signalSize << '\n';
 
     createOutputFile(outputFileName);
+
+    endTime = clock();
+    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
+    printf("The process was done in %.2f seconds!\n", time);
+
     return 0;
 }
 
@@ -73,19 +81,13 @@ void createOutputFile(char *filename)
     double *IR_signal = new double[IRfile->signalSize];
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
     double *output_signal = new double[output_size];
-    clock_t startTime;
-    clock_t endTime;
 
     shortToDouble(inputfile, input_signal);
     shortToDouble(IRfile, IR_signal);
 
     printf("Start convolution...\n");
-    startTime = clock();
     convolve(input_signal, inputfile->signalSize, IR_signal, IRfile->signalSize, output_signal, output_size);
-    endTime = clock();
-    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
     printf("End convolution!\n");
-    printf("The convolution was done in %.2f seconds!\n", time);
 
     adjustOutputSignal(inputfile, output_signal, output_size);
 

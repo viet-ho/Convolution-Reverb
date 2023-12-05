@@ -25,6 +25,9 @@ WAVEFile *IRfile = new WAVEFile();
 
 int main(int argc, char *argv[])
 {
+    clock_t startTime;
+    clock_t endTime;
+    startTime = clock();
 
     if (argc != 4)
     {
@@ -42,6 +45,11 @@ int main(int argc, char *argv[])
     cout << "Input Size: " << inputfile->signalSize << ", Impulse Size: " << IRfile->signalSize << '\n';
 
     createOutputFile(outputFileName);
+
+    endTime = clock();
+    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
+    printf("The process was done in %.3f seconds!\n", time);
+
     return 0;
 }
 
@@ -121,19 +129,13 @@ void shortToDouble(WAVEFile *waveFile, double doubleArray[])
 
 void convolve(double *freq_input_signal, double *freq_IR_signal, double *freq_output_signal, int length)
 {
-    clock_t startTime;
-    clock_t endTime;
     printf("Start convolution...\n");
-    startTime = clock();
     for (int i = 0; i < length; i += 2)
     {
         freq_output_signal[i] = (freq_input_signal[i] * freq_IR_signal[i]) - (freq_input_signal[i + 1] * freq_IR_signal[i + 1]);
         freq_output_signal[i + 1] = (freq_input_signal[i + 1] * freq_IR_signal[i]) + (freq_input_signal[i] * freq_IR_signal[i + 1]);
     }
-    endTime = clock();
-    double time = ((double)(endTime - startTime)) / CLOCKS_PER_SEC;
     printf("End convolution!\n");
-    printf("The convolution was done in %.4f seconds!\n", time);
 }
 
 void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int sampleRate, FILE *outputFile)
