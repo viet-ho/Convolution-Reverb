@@ -1,3 +1,10 @@
+/*
+ * Name: Viet Ho
+ * UCID: 30122283
+ * Date: Dec. 5th, 2023
+ * Class Description: Header file for WAVE file and reading data from file.
+ */
+
 #ifndef HEADERFILE_H
 #define HEADERFILE_H
 
@@ -8,6 +15,7 @@
 class WAVEFile
 {
 
+// WAVE file structure
 public:
     char chunkID[4];
     int chunkSize;
@@ -26,6 +34,7 @@ public:
     short *signal;
     int signalSize;
 
+    // Method to read data from WAVE file
     void readWAVEFile(const char *fileName)
     {
         std::ifstream file(fileName, std::ios::binary);
@@ -60,6 +69,7 @@ public:
     }
 
 private:
+    // Method to convert data to signal based on bitsPerSample
     void dataToSignal()
     {
         signal = nullptr;
