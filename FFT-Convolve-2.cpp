@@ -1,3 +1,11 @@
+/*
+ * Name: Viet Ho
+ * UCID: 30122283
+ * Date: Dec. 5th, 2023
+ * Class Description: A program based on the FFT-Convolve-1 program, with applying the second code-tuning technique optimization. 
+    The program should be invoked from the command line as follows: FFT-Convolve-2 inputfile IRfile outputfile
+ */
+
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -25,6 +33,7 @@ WAVEFile *IRfile = new WAVEFile();
 
 int main(int argc, char *argv[])
 {
+    // Using clock() to calculate the processing time
     clock_t startTime;
     clock_t endTime;
     startTime = clock();
@@ -39,6 +48,7 @@ int main(int argc, char *argv[])
     char *IRFileName = argv[2];
     char *outputFileName = argv[3];
 
+    // Read input files
     inputfile->readWAVEFile(inputFileName);
     IRfile->readWAVEFile(IRFileName);
 
@@ -53,8 +63,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+// Method to create a WAVE output file with convolving the the input signals and writing headers and signal data
 void createOutputFile(char *filename)
 {
+    // Apply frequency-domain transformation
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
     double *output_signal = new double[output_size];
     double *input_signal = new double[inputfile->signalSize];
@@ -96,6 +108,7 @@ void createOutputFile(char *filename)
     four1(freq_input_signal - 1, powerOfTwo, 1);
     four1(freq_IR_signal - 1, powerOfTwo, 1);
 
+    // Apply frequency-domain convolution
     convolve(freq_input_signal, freq_IR_signal, freq_output_signal, powerOfTwo * 2);
 
     four1(freq_output_signal - 1, powerOfTwo, -1);
@@ -123,6 +136,7 @@ void createOutputFile(char *filename)
     fclose(outputfile);
 }
 
+// Method to convert short(signal) to double
 void shortToDouble(WAVEFile *waveFile, double doubleArray[])
 {
     for (int i = 0; i < (waveFile->signalSize); i++)
@@ -131,6 +145,7 @@ void shortToDouble(WAVEFile *waveFile, double doubleArray[])
     }
 }
 
+// Method to convolve frequency-domain signals, producing an output signal
 void convolve(double *freq_input_signal, double *freq_IR_signal, double *freq_output_signal, int length)
 {
     printf("Start convolution...\n");
@@ -142,6 +157,7 @@ void convolve(double *freq_input_signal, double *freq_IR_signal, double *freq_ou
     printf("End convolution!\n");
 }
 
+// Method to write the header of the wave file
 void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int sampleRate, FILE *outputFile)
 {
     int subChunk2Size = numChannels * numSamples * (bitsPerSample / 8);
@@ -164,6 +180,7 @@ void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int
     fwriteIntLSB(subChunk2Size, outputFile);
 }
 
+// Method to writes a 4-byte integer to the file stream
 // Inline Functions - Optimization 2
 inline size_t fwriteIntLSB(int data, FILE *outputFile)
 {
@@ -175,6 +192,7 @@ inline size_t fwriteIntLSB(int data, FILE *outputFile)
     return fwrite(array, sizeof(unsigned char), 4, outputFile);
 }
 
+// Method to write a 2-byte integer to the file stream
 // Inline Functions - Optimization 2
 inline size_t fwriteShortLSB(short data, FILE *outputFile)
 {
@@ -184,6 +202,7 @@ inline size_t fwriteShortLSB(short data, FILE *outputFile)
     return fwrite(array, sizeof(unsigned char), 2, outputFile);
 }
 
+// Method to adjust output signal to avoid overflow
 void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_size)
 {
 
@@ -221,6 +240,7 @@ void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_si
     }
 }
 
+// The four1 method from Numerical Recipes in C p. 507 - 508.
 void four1(double data[], unsigned long nn, int isign)
 {
     unsigned long n, mmax, m, j, istep, i;

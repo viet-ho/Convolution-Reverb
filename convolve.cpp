@@ -1,3 +1,12 @@
+/*
+ * Name: Viet Ho
+ * UCID: 30122283
+ * Date: Dec. 5th, 2023
+ * Class Description: A baseline program where the convolution is implemented directly in the
+    time domain (use the input-side convolution algorithm found on p. 112-115 in the Smith text).
+    The program should be invoked from the command line as follows: convolve inputfile IRfile outputfile
+ */
+
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -19,6 +28,7 @@ WAVEFile *IRfile = new WAVEFile();
 
 int main(int argc, char *argv[])
 {
+    // Using clock() to calculate the processing time
     clock_t startTime;
     clock_t endTime;
     startTime = clock();
@@ -33,6 +43,7 @@ int main(int argc, char *argv[])
     char *IRFileName = argv[2];
     char *outputFileName = argv[3];
 
+    // Read input files
     inputfile->readWAVEFile(inputFileName);
     IRfile->readWAVEFile(IRFileName);
 
@@ -47,9 +58,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+// Method to convolve two signals, producing an output signal
+// The convolution was done in the time domain using the "Input Side Algorithm" (Smith text, p. 112 -115)
 void convolve(double *x, int N, double *h, int M, double *y, int P)
 {
-
     int n, m;
 
     if (P != (N + M - 1))
@@ -74,9 +86,10 @@ void convolve(double *x, int N, double *h, int M, double *y, int P)
     }
 }
 
+
+// Method to create a WAVE output file with convolving the the input signals and writing headers and signal data
 void createOutputFile(char *filename)
 {
-
     double *input_signal = new double[inputfile->signalSize];
     double *IR_signal = new double[IRfile->signalSize];
     int output_size = inputfile->signalSize + IRfile->signalSize - 1;
@@ -109,18 +122,18 @@ void createOutputFile(char *filename)
     fclose(outputfile);
 }
 
+// Mehthod to convert short(signal) to double
 void shortToDouble(WAVEFile *waveFile, double *doubleArray)
 {
-
     for (int i = 0; i < (waveFile->signalSize); i++)
     {
         doubleArray[i] = ((double)waveFile->signal[i]) / 32678.0;
     }
 }
 
+// Method to adjust output signal to avoid overflow
 void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_size)
 {
-
     double signalInputMax = 0.0;
     double signalOutputMax = 0.0;
 
@@ -145,6 +158,7 @@ void adjustOutputSignal(WAVEFile *waveFile, double *output_signal, int output_si
     }
 }
 
+// Method to write the header of the wave file
 void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int sampleRate, FILE *outputFile)
 {
 
@@ -168,6 +182,7 @@ void writeWAVEFileHeader(int numChannels, int numSamples, int bitsPerSample, int
     fwriteIntLSB(subChunk2Size, outputFile);
 }
 
+// Method to writes a 4-byte integer to the file stream
 size_t fwriteIntLSB(int data, FILE *outputFile)
 {
 
@@ -179,6 +194,7 @@ size_t fwriteIntLSB(int data, FILE *outputFile)
     return fwrite(array, sizeof(unsigned char), 4, outputFile);
 }
 
+// Method to write a 2-byte integer to the file stream
 size_t fwriteShortLSB(short data, FILE *outputFile)
 {
 
