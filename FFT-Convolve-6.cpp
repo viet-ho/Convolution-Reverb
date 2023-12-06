@@ -2,8 +2,8 @@
  * Name: Viet Ho
  * UCID: 30122283
  * Date: Dec. 5th, 2023
- * Class Description: A program based on the FFT-Convolve-4 program, with applying the fifth code-tuning technique optimization. 
-    The program should be invoked from the command line as follows: FFT-Convolve-5 inputfile IRfile outputfile
+ * Class Description: A program based on the FFT-Convolve-5 program, with applying the fifth code-tuning technique optimization. 
+    The program should be invoked from the command line as follows: FFT-Convolve-6 inputfile IRfile outputfile
  */
 
 #include <iostream>
