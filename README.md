@@ -7,7 +7,7 @@ Convolution-Reverb is a command-line program developed for processing audio sign
 - Audio Convolution: Apply natural-sounding reverberation to recorded sounds.
 - Command-line Interface: Easy to use and integrate into existing workflows.
 - Optimized Performance: Algorithm and compiler-level optimizations for efficient processing.
-- File Format Support: Initially supports monophonic 16-bit 44.1 kHz WAV files. Bonus features include handling stereo files and additional formats like .aiff and .snd.
+- File Format Support: Initially supports monophonic 16-bit 44.1 kHz WAV files.
 
 ## Installation
 
